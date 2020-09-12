@@ -6,7 +6,7 @@ from core import utils
 
 
 class Dataset(object):
-    """Implement Dataset here"""
+    """Implement Dataset class object here"""
 
     def __init__(self, dataset, categorical_indices):
         self.dataset = dataset
