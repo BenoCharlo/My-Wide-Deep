@@ -10,7 +10,7 @@ class Model(object):
         pass
 
     
-    def build_model(self, categorical_variables, non_categorical_variables):
+    def build_model(self, categorical_variables, non_categorical_variables, cross_products):
 
         categorical_input = self.input_fn(categorical_variables)
         non_categorical_input = self.input_fn(non_categorical_variables, False)
@@ -19,11 +19,25 @@ class Model(object):
 
         flattens = self.input_flattened(embeddings)
         formatted_input = list(non_categorical_input.values()) + list(flattens.values())
-        concatenate = tf.keras.layers.Concatenate()(formatted_input)
+        concatenate_1 = tf.keras.layers.Concatenate()(formatted_input)
 
         dense_1 = tf.keras.layers.Dense(1024, activation=tf.nn.relu)(concatenate)
         dense_2 = tf.keras.layers.Dense(512, activation=tf.nn.relu)(dense_1)
         dense_3 = tf.keras.layers.Dense(256, activation=tf.nn.relu)(dense_2)
+
+        flatten_cross_products = tf.keras.layers.Flatten()(cross_products)
+
+        concatenate_2 = tf.keras.layers.Concatenate()([dense_3, flatten_cross_products])
+
+        output = tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)(concatenate_2)
+
+        model = tf.keras.Model(inputs=[[categorical_variables, non_categorical_variables], cross_products], outputs=output)
+
+        model.compile(optimizer=tf.train.AdamOptimizer(0.01),
+                    loss=tf.keras.losses.binary_crossentropy,
+                    metrics=[tf.keras.metrics.Accuracy])
+
+        return model
     
     def input_fn(self, variables, is_categorical=True):
         input_variables = dict()
