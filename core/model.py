@@ -33,7 +33,7 @@ class Model(object):
 
         model = tf.keras.Model(inputs=[[categorical_variables, non_categorical_variables], cross_products], outputs=output)
 
-        model.compile(optimizer=tf.train.AdamOptimizer(0.01),
+        model.compile(optimizer=tf.train.AdamOptimizer(config.LEARNING_RATE),
                     loss=tf.keras.losses.binary_crossentropy,
                     metrics=[tf.keras.metrics.Accuracy])
 
