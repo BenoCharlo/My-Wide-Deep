@@ -6,14 +6,16 @@ from core import utils, config
 
 class Model(object):
 
-    def __init__(self, embedding_size):
-        pass
+    def __init__(self, categoricals, non_categoricals, embedding_size=config.EMBEDDING_SIZE):
+        self.embedding_size = embedding_size
+        self.categorical_variables = categoricals
+        self.non_categorical_variables = non_categoricals
 
     
-    def build_model(self, categorical_variables, non_categorical_variables, cross_products):
+    def build_model(self, cross_products):
 
-        categorical_input = self.input_fn(categorical_variables)
-        non_categorical_input = self.input_fn(non_categorical_variables, False)
+        categorical_input = self.input_fn(self.categorical_variables)
+        non_categorical_input = self.input_fn(self.non_categorical_variables, False)
 
         embeddings = self.input_embedding(categorical_input)
 
@@ -31,7 +33,7 @@ class Model(object):
 
         output = tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)(concatenate_2)
 
-        model = tf.keras.Model(inputs=[[categorical_variables, non_categorical_variables], cross_products], outputs=output)
+        model = tf.keras.Model(inputs=[[categorical_input, non_categorical_input], cross_products], outputs=output)
 
         model.compile(optimizer=tf.train.AdamOptimizer(config.LEARNING_RATE),
                     loss=tf.keras.losses.binary_crossentropy,
@@ -45,11 +47,11 @@ class Model(object):
         if is_categorical:
             for variable in variables:
                 var_shape = len(np.unique(variable))
-                input_variables[str(variable)] = (tf.keras.layers.Input(shape=len(np.unique(variable))), var_shape)
+                input_variables[str(variable)] = (tf.keras.layers.Input(shape=[1], name=str(variable)), var_shape)
 
         else:
             var_shape = len(variables)
-            input_variables["non_categorical_input"] = tf.keras.layers.Input(shape=var_shape)
+            input_variables["non_categorical_input"] = tf.keras.layers.Input(shape=[var_shape])
 
         return input_variables
 
@@ -62,7 +64,7 @@ class Model(object):
             embeddings[key] = tf.keras.layers.Embedding(
                 name="embedding_" + str(key), 
                 input_dim=var_shape,
-                output_dim = config.EMBEDDING_SIZE)(variable)
+                output_dim = embedding_size)(variable)
 
         return embeddings
 
