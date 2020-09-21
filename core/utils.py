@@ -5,7 +5,7 @@ import pandas as pd
 #################################
 
 
-def load_data(self, dataset_dir, file_name):
+def load_data(dataset_dir, file_name):
 
     dataset_path = os.path.join(dataset_dir, file_name)
     categorical_path = os.path.join(dataset_dir, "categorical.txt")
