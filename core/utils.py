@@ -9,12 +9,14 @@ def load_data(dataset_dir, file_name):
 
     dataset_path = os.path.join(dataset_dir, file_name)
     categorical_path = os.path.join(dataset_dir, "categorical.txt")
+    target_path = os.path.join(dataset_dir, "target.txt")
 
     dataset = pd.read_csv(dataset_path)
     categorical_variables = open(categorical_path, "r").readlines()
     categorical_variables = [int(value) for value in categorical_variables]
+    target_name = open(target_path, "r").readlines()[0]
 
-    return dataset, categorical_variables
+    return dataset, target_name, categorical_variables
 
 
 def cross_two_variables(variable1, variable2):
